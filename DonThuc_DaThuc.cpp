@@ -1,7 +1,9 @@
+
 #include<iostream>
 #include<iomanip>
 using namespace std;
 #include<math.h>
+#include<string>
 
 class DonThuc{
     private:
@@ -21,6 +23,9 @@ class DonThuc{
         void SetDeg(int x){
             deg = x;
         }
+        void SetCoef(double x){
+            coef = x;
+        }
         friend istream& operator >> (istream& in, DonThuc& x);
         friend ostream& operator << (ostream& out, const DonThuc& x);
         double calVal(double x);
@@ -35,6 +40,7 @@ istream& operator >> (istream& in, DonThuc& x){
     cout << "nhap so mu cua don thuc: "; in >> x.deg;
     return in;
 }
+
 ostream& operator << (ostream& out, const DonThuc& x){
     if(x.coef == 0){
         return out;
@@ -46,7 +52,7 @@ ostream& operator << (ostream& out, const DonThuc& x){
     if(x.coef == 1){}
     if(x.coef == -1 ) cout << "-";
     else if(x.coef == 1){}
-    else  out << setprecision(3) << x.coef;
+    else  out << setprecision(3) << (size_t)x.coef;
     if(x.deg == 0) return out;
     if(x.deg == 1) out << "x";
     else {
@@ -112,6 +118,7 @@ class DaThuc{
             return *this;
         }
         bool operator >= (const DaThuc& x);
+        DaThuc Cal_fx_c(int c);
 };
 
 bool DaThuc::operator >= (const DaThuc& x){
@@ -217,7 +224,6 @@ DaThuc DaThuc::operator * (const DaThuc& x){
     return result;
 }
 
-
 DaThuc DaThuc::operator * (const DonThuc& x) const{
     DaThuc result;
     result.size = size + x.GetDeg();
@@ -254,18 +260,45 @@ DaThuc DaThuc::operator / (const DaThuc& x){
     return result;
 }
 
+
+DaThuc DaThuc::Cal_fx_c(int c){
+    double a[size][size];
+    for(int i = size - 1; i >= 0; i--){
+        a[0][size - 1 - i] = list[i].GetCoef();
+    }
+    //xu li
+    for(int i = 1; i < size; i++){
+        a[i][0] = a[0][0];
+        for(int j = 1; j < size; j++){
+            //xu li quy hoach dong
+            a[i][j] = a[i][j - 1] * c + a[i - 1][j];
+        }
+    }
+
+    //copy he so
+    DaThuc result;
+    result.size = size;
+    result.list = new DonThuc[result.size];
+    for(int i = 0; i < size - 1; i++){
+        result[i].SetCoef(a[i + 1][size - i - 1]);
+        result[i].SetDeg(i);
+    }
+    result[size - 1].SetCoef(a[0][0]);
+    result[size- 1].SetDeg(size - 1);
+    return result;
+}
+
 int main(){
     DaThuc x;
     cin >> x;
     cout << x;
-    DaThuc y;
-    cin >> y;
-    cout << endl;
-    cout << y;
-    cout << endl;
-    DaThuc z;
-    z = x / y;
-    cout << z;
+    int c;
+    cout << "nhap c: "; cin >> c;
+    DaThuc p = x.Cal_fx_c(c);
+    cout << "P(x ";
+    (c < 0) ? cout << c : cout << " + " << c;
+    cout << ")= ";
+    cout << p;
     cout << endl;
     system("pause");
 }
@@ -282,3 +315,6 @@ int main(){
 
 // 2 3 
 // 4 1
+
+// 6 2 0 1 1 -1 2 0 3 0 4 4 5 2 6
+// -1
